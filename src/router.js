@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from './views/Home.vue'
 import Test from './views/Test.vue'
 import Tiles from './views/Tiles.vue'
+import Calendar from './views/Calendar.vue'
 
 Vue.use(Router)
 
@@ -32,6 +33,11 @@ export default new Router({
       path: '/tiles',
       name: 'tiles',
       component: Tiles
-    }
+    },
+    {
+      path: '/calendar',
+      name: 'calendar',
+      component: Calendar
+    },
   ]
 })

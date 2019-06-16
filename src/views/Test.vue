@@ -2,29 +2,58 @@
   <v-app id="app">
     <v-container class="p-container" fluid>
       <v-layout class row wrap justify-start>
-        <v-flex xs9>
-          <div class="p-date">
+        <v-flex xs2>
+          <clock></clock>
+        </v-flex>
+        <v-flex xs5>
+          <v-slider
+            label="制限時間"
+            thumb-size="40"
+            max="1800"
+            step="30"
+            prepend-icon="timer"
+            v-model="limit"
+            v-bind:value="limit"
+            @change="onChangeLimit"
+            readonly
+          ></v-slider>
+          <div class="p-time_display">{{limit_display}}</div>
+          <v-slider
+            label="経過時間"
+            thumb-size="40"
+            color="orange"
+            max="1800"
+            height="50"
+            prepend-icon="timer"
+            v-model="elapsed"
+            v-bind:value="elapsed"
+            readonly
+          ></v-slider>
+          <div class="p-time_display">{{elapsed_display}}</div>
+        </v-flex>
+        <v-flex xs5>
+          <!-- カウントダウン -->
+          <circular-count-down-timer
+            :initial-value="1"
+            :stroke-width="16"
+            :padding="4"
+            :show-hour="false"
+            :paused="pause"
+            ref="countdown"
+          ></circular-count-down-timer>
+        </v-flex>
+
+          <div class="p-date" v-if="false">
             <span class="display-3">{{date.h}}</span>じ
             <span class="display-3">{{date.m}}</span>ふん
-            <span class="display-3">{{date.s}}</span>びょう
-            <span>/</span>
+            <span class="display-3">{{date.s}}</span>びょう<br>
             <span class="display-1">{{date.Y}}</span>ねん
             <span class="display-1">{{date.M}}</span>がつ
             <span class="display-1">{{date.D}}</span>にち
           </div>
-        </v-flex>
-        <v-flex xs3>
-          <v-select
-            :items="saved_list"
-            item-text="name"
-            item-value="data"
-            label="saved list"
-            @change="onChangeSelect"
-          ></v-select>
-        </v-flex>
       </v-layout>
       <v-layout class="p-target" row wrap>
-        <v-draggable class="drag-container">
+        <v-draggable class="drag-container" :options="{disabled: true}">
           <v-flex
             @click="toggle_complete(item.id,$event)"
             class="pa-3"
@@ -49,8 +78,21 @@
           </v-flex>
         </v-draggable>
       </v-layout>
-      <v-layout class row wrap>
-        <v-flex xs6>
+      <v-layout class="p-finished" v-if="done" row wrap align-center>
+        <v-flex xs12>
+          <span>ぜんぶ おわった!!</span>
+          <v-button @click="complete_all">OK</v-button>
+        </v-flex>
+      </v-layout>
+      <v-layout class="p-sidebar" :class="{is_show:is_side}" row wrap>
+        <v-flex xs12>
+          <v-select
+            :items="saved_list"
+            item-text="name"
+            item-value="data"
+            label="saved list"
+            @change="onChangeSelect"
+          ></v-select>
           <v-slider
             label="制限時間"
             thumb-size="40"
@@ -62,42 +104,25 @@
             @change="onChangeLimit"
           ></v-slider>
           <div class="p-time_display">{{limit_display}}</div>
-          <v-slider
-            label="経過時間"
-            thumb-size="40"
-            color="orange"
-            max="1800"
-            height="50"
-            prepend-icon="timer"
-            v-model="elapsed"
-            v-bind:value="elapsed"
-            readonly
-          ></v-slider>
-          <div class="p-time_display">{{elapsed_display}}</div>
-        </v-flex>
-        <v-flex xs6>
-          <!-- カウントダウン -->
-          <circular-count-down-timer
-            :initial-value="1"
-            :stroke-width="16"
-            :padding="4"
-            :show-hour="false"
-            :paused="pause"
-            ref="countdown"
-          ></circular-count-down-timer>
-        </v-flex>
-        <v-flex xs12>
-          <v-btn @click="start_timer">START</v-btn>
-          <v-btn @click="stop_timer">STOP</v-btn>
-          <a href="/tiles">Tiles</a>
+          <v-flex xs12>
+            <v-btn @click="start_timer">START</v-btn>
+            <v-btn @click="stop_timer">STOP</v-btn>
+            <a href="/tiles">Tiles</a>
+          </v-flex>
+
         </v-flex>
       </v-layout>
-      <v-layout class="p-finished" v-if="done" row wrap align-center>
-        <v-flex xs12>
-          <span>ぜんぶ おわった!!</span>
-          <v-button @click="complete_all">OK</v-button>
-        </v-flex>
-      </v-layout>
+      <v-btn
+        fixed
+        dark
+        fab
+        bottom
+        right
+        color="green"
+        @click="toggle_side"
+      >
+          <v-icon>menu</v-icon>
+      </v-btn>
     </v-container>
   </v-app>
 </template>
@@ -107,7 +132,7 @@
 // import TaskCard from './TaskCard';
 import Draggable from "vuedraggable";
 import anime from "animejs";
-
+import Clock from 'vue-clock2';
 import { setInterval, clearInterval } from "timers";
 
 var timer = "";
@@ -151,9 +176,13 @@ export default {
   },
   components: {
     // "v-taskcard": TaskCard,
-    "v-draggable": Draggable
+    "v-draggable": Draggable,
+    Clock,
   },
   methods: {
+    toggle_side:function(){
+      this.is_side = !this.is_side;
+    },
     toggle_complete: function(id) {
       var _idx = this._.findIndex(this.items, { id: id });
       this.items[_idx].finished = !this.items[_idx].finished;
@@ -216,6 +245,8 @@ export default {
   },
   data: function() {
     return {
+      time: '10:40',
+      is_side:false,
       limit: 0,
       elapsed: 0,
       start_time: 0,
@@ -357,6 +388,7 @@ export default {
   &_list{
     overflow-x: scroll;
     padding: 20px 10px;
+    -webkit-overflow-scrolling: touch;
     > div{
       min-width: 27.5%;
     }
@@ -418,4 +450,22 @@ export default {
     }
   }
 }
+
+  .p-sidebar{
+    position: fixed; 
+    width: 100vw;
+    height: 50vh;
+    bottom: 0;
+    left: 0;
+    padding: 20px;
+    background:rgba(255,255,255,0.85);
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    transition:all ease 0.3s;
+    transform:translateY(100vh);
+
+    &.is_show{
+      transform:translateY(0);
+    }
+  }
+
 </style>
