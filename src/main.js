@@ -33,7 +33,8 @@ global.$db = new Dexie("Todo");
 
 // store定義
 $db.version(1).stores({
-  todos: "++id,name,data"
+  todos: "++id,name,data",
+  scores: "++id,setId,score,date"
 });
 
 new Vue({

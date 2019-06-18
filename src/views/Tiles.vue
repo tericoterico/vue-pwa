@@ -182,77 +182,88 @@ export default {
           name: "あさ ごはん",
           img: "./img/food_toast.png",
           added: false,
-          finished:false
+          finished:false,
+          score:1
         },
         {
           id: 2,
           name: "はみがき",
           img: "./img/ha_hamigaki_boy.png",
           added: false,
-          finished:false
+          finished:false,
+          score:1
         },
         {
           id: 3,
           name: "おきがえ",
           img: "./img/kigae_boy.png",
           added: false,
-          finished:false
+          finished:false,
+          score:1
         },
         {
           id: 4,
           name: "おかたづけ",
           img: "./img/omocha_kataduke.png",
           added: false,
-          finished:false
+          finished:false,
+          score:1
         },
         {
           id: 5,
           name: "かお あらう",
           img: "./img/sengan_boy.png",
           added: false,
-          finished:false
+          finished:false,
+          score:1
         },
         {
           id: 6,
           name: "てあらい うがい",
           img: "./img/ugai_tearai.png",
           added: false,
-          finished:false
+          finished:false,
+          score:1
         },
         {
           id: 7,
           name: "もちもの エプロン",
           img: "./img/apron.png",
           added: false,
-          finished:false
+          finished:false,
+          score:1
         },
         {
           id: 8,
           name: "もちもの ハンカチ",
           img: "./img/fashion_handkerchief_blue.png",
           added: false,
-          finished:false
+          finished:false,
+          score:1
         },
         {
           id: 9,
           name: "もちもの はぶらし",
           img: "./img/haburashi.png",
           added: false,
-          finished:false
+          finished:false,
+          score:1
         },
         {
           id: 10,
           name: "もちもの すいとう",
           img: "./img/obentou_suitou.png",
           added: false,
-          finished:false
+          finished:false,
+          score:1
         },
         {
           id: 11,
           name: "もちもの うわぐつ",
           img: "./img/uwabaki_blue.png",
           added: false,
-          finished:false
+          finished:false,
+          score:1
         }
       ],
       todos: []

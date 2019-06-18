@@ -1,12 +1,15 @@
 <template>
   <v-app id="app">
     <v-container class="p-container" fluid>
-      <v-layout class row wrap justify-start>
+      <v-layout class row wrap justify-start mb-3>
+        <!-- clock -->
         <v-flex xs2>
           <clock></clock>
         </v-flex>
-        <v-flex xs5>
+
+        <v-flex xs6 pl-4>
           <v-slider
+            class="mt-0"
             label="制限時間"
             thumb-size="40"
             max="1800"
@@ -15,31 +18,34 @@
             v-model="limit"
             v-bind:value="limit"
             @change="onChangeLimit"
+            :messages="limit_display"
             readonly
           ></v-slider>
-          <div class="p-time_display">{{limit_display}}</div>
+          <v-divider class="mt-3 mb-3"></v-divider>
           <v-slider
+            class="mt-0"
             label="経過時間"
             thumb-size="40"
             color="orange"
             max="1800"
-            height="50"
             prepend-icon="timer"
             v-model="elapsed"
             v-bind:value="elapsed"
+            :messages="elapsed_display"
             readonly
           ></v-slider>
-          <div class="p-time_display">{{elapsed_display}}</div>
         </v-flex>
-        <v-flex xs5>
+        <v-flex xs4>
           <!-- カウントダウン -->
           <circular-count-down-timer
             :initial-value="1"
             :stroke-width="16"
-            :padding="4"
+            :padding="0"
             :show-hour="false"
             :paused="pause"
             ref="countdown"
+            :size="150"
+            class="count-down-circle"
           ></circular-count-down-timer>
         </v-flex>
 
@@ -84,17 +90,53 @@
           <v-button @click="complete_all">OK</v-button>
         </v-flex>
       </v-layout>
+      <!-- サイドバー -->
       <v-layout class="p-sidebar" :class="{is_show:is_side}" row wrap>
-        <v-flex xs12>
+        <v-flex xs3 pr-5>
+          <v-list two-line>
+            <template v-for="(item, index) in menu">
+              <v-subheader
+                v-if="item.header"
+                :key="item.header"
+              >
+                {{ item.header }}
+              </v-subheader>
+  
+              <v-divider
+                v-else-if="item.divider"
+                :key="index"
+                :inset="item.inset"
+              ></v-divider>
+  
+              <v-list-tile
+                v-else
+                :key="item.title"
+                avatar
+                @click=""
+              >
+  
+                <v-list-tile-content>
+                  <v-list-tile-title v-html="item.title" @click="onClickMenu(item.link)">
+                  </v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </template>
+          </v-list>
+
+
+
+        </v-flex>
+        <v-flex xs9>
           <v-select
+            v-model="selected_saved_id"
             :items="saved_list"
             item-text="name"
-            item-value="data"
-            label="saved list"
+            item-value="id"
+            label="保存したセットから読み込む"
             @change="onChangeSelect"
           ></v-select>
           <v-slider
-            label="制限時間"
+            label="制限時間を設定"
             thumb-size="40"
             max="1800"
             step="30"
@@ -107,6 +149,8 @@
           <v-flex xs12>
             <v-btn @click="start_timer">START</v-btn>
             <v-btn @click="stop_timer">STOP</v-btn>
+            <v-btn @click="finish_timer">Finish</v-btn>
+            <v-btn @click="show_sum_score">SUM</v-btn>
             <a href="/tiles">Tiles</a>
           </v-flex>
 
@@ -180,6 +224,21 @@ export default {
     Clock,
   },
   methods: {
+    //スコアの合計値を算出
+    show_sum_score:async function(){
+      let sum = 0;
+      
+      await $db.scores
+      .where('score')
+      .above(0)
+      .each(function(item){
+        sum += item.score
+      })
+      alert("合計点数は"+sum+"です");
+    },
+    onClickMenu:function(link){
+      location.href=link;
+    },
     toggle_side:function(){
       this.is_side = !this.is_side;
     },
@@ -232,15 +291,44 @@ export default {
       $this.pause = true;
       clearInterval(timer);
     },
-    onChangeSelect:function(data){
-      this.items = data;
+    onChangeSelect:function(id){
+      this.items = _.find(this.saved_list, {id:id}).data;
     },
     onChangeLimit:function(data){
-      console.log(data);
       this.$refs.countdown.updateTime(data)
     },
     complete_all:function(){
       this.done = false;
+    },
+    finish_timer:function(){
+      this.checkComplete();
+    },
+    checkComplete:function(){
+      //count complete
+
+      // console.log(this.selected_saved_id);
+      // console.log(this.$moment().format('YYYY-MM-DD HH:mm:ss'));
+      // console.log(_.filter(this.items, {finished:true}).length);
+
+      const $this = this;
+
+      //DBへ保存
+      $db.scores
+        .add({
+          setId: $this.selected_saved_id,
+          date: $this.$moment().format('X'),
+          score: _.filter($this.items, {finished:true}).length
+        })
+        .then(function(e) {
+          //保存完了したらcheckedを全て外す
+          _.each($this.items, function(v,k){
+            v.finished = false;
+          })
+
+        })
+        .catch(function() {
+          alert("DBの保存に失敗しました。");
+        });
     }
   },
   data: function() {
@@ -252,7 +340,8 @@ export default {
       start_time: 0,
       done:false,
       pause: true,
-      saved_list:"",
+      selected_saved_id:"",
+      saved_list:[],
       date: {
         h: 0,
         m: 0,
@@ -261,38 +350,27 @@ export default {
         M: 0,
         D: 0
       },
+      menu: [
+        { header: 'Menu' },
+        {
+          icon: 'menu',
+          link: './tiles',
+          title: 'Tiles'
+        },
+        { divider: true, inset: false },
+        {
+          icon: 'menu',
+          link: './test',
+          title: 'Test'
+        },
+        { divider: true, inset: false },
+        {
+          icon: 'menu',
+          link: './calendar',
+          title: 'Calendar'
+        },
+      ],
       items: [
-        // {
-        //   id: 1,
-        //   name: "キャベツ",
-        //   img: "./img/gomi_bunbetsu.png",
-        //   finish: false
-        // },
-        // {
-        //   id: 2,
-        //   name: "ステーキ",
-        //   img: "./img/gomi_bunbetsu.png",
-        //   finish: false
-        // },
-        // {
-        //   id: 3,
-        //   name: "リンゴ",
-        //   img: "./img/gomi_bunbetsu.png",
-        //   finish: false
-        // },
-        // {
-        //   id: 4,
-        //   name: "きゅうり",
-        //   img: "./img/gomi_bunbetsu.png",
-        //   finish: false
-        // },
-        // { id: 5, name: "豚足", img: "./img/gomi_bunbetsu.png", finish: false },
-        // {
-        //   id: 6,
-        //   name: "コロッケ",
-        //   img: "./img/gomi_bunbetsu.png",
-        //   finish: false
-        // }
       ]
     };
   }
@@ -467,5 +545,29 @@ export default {
       transform:translateY(0);
     }
   }
+
+
+.v-input--slider{
+  .v-input__slot{
+    margin-bottom: 0;
+  }
+
+  .v-messages{
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+}
+
+.count-down-circle{
+  > div{
+    width: auto !important;
+  }
+  .item{
+    margin: 0 6px;
+    font-weight: bold;
+  }
+}
 
 </style>
