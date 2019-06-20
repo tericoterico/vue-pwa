@@ -10,9 +10,10 @@ import CircularCountDownTimer from 'vue-circular-count-down-timer';
 import Dexie from "dexie"
 import moment from 'moment';
 import lodash from 'lodash';
+import VueIziToast from 'vue-izitoast';
 
-// VuetifyのCSS
-import 'vuetify/dist/vuetify.min.css'
+import 'vuetify/dist/vuetify.min.css' // VuetifyのCSS
+import 'izitoast/dist/css/iziToast.min.css'; // IziToastのCSS
 
 //全体で共通使用する外部ライブラリ
 Object.defineProperty(Vue.prototype, '$moment', { value: moment });
@@ -22,11 +23,10 @@ import './registerServiceWorker'
 
 Vue.config.productionTip = false
 
-//Vueプラグイン インポート
-
 //Vueプラグイン 登録
 Vue.use(CircularCountDownTimer);
-Vue.use(Vuetify, {options: { customProperties: true}});
+Vue.use(Vuetify, { options: { customProperties: true } });
+Vue.use(VueIziToast);
 
 //Todo:グローバル変数ではなく、別の方法で各コンポーネントから一括で参照できる定義方法はないのか。。
 global.$db = new Dexie("Todo");

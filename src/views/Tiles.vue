@@ -50,9 +50,7 @@
           </li>
         </v-flex>
       </v-layout>
-      <v-layout>
-        <a href="/test">test</a>
-      </v-layout>
+
     </v-container>
   </v-app>
 </template>
@@ -94,16 +92,24 @@ export default {
     "v-draggable": Draggable
   },
   methods: {
+
     /**
      * 一覧からtodoを追加
      *
      */
+
     add_card: function(id) {
       var _data = this._.find(this.items, { id: id });
 
       _data.added = true;
       // this.todos.push(_data);
     },
+
+    /**
+     * コンボボックスの値が変更
+     *
+     */
+
     onChangeCombo:function(e){
       const $this = this;
       // _.each($this.items, function(v,k){
@@ -125,29 +131,44 @@ export default {
       //   _.find($this.items, {'id':i}).added = true;
       // })
     },
+
+    /**
+     * Todoリストからタイルを削除
+     *
+     */
+
     delete_from_list:function(id){
        var _data = this._.find(this.items, { id: id });
        _data.added = false;
     },
+
     /**
      * 選択したtodoを読み込み
      *
      */
+
     load_todo: function() {
       console.log("loading..");
     },
+
     /**
      * 選択したtodoを削除
      *
      */
+
     delete_todo: function() {
       console.log("delte..");
     },
+
     /**
      * todoを保存
      *
      */
+
     save_todo: function() {
+
+      const $this = this;
+
       let errList = [];
       try {
         //validation
@@ -162,7 +183,12 @@ export default {
             name: this.preset_name,
             data: this.items
           })
-          .then(function() {})
+          .then(function() {
+
+            //Toast
+            $this.$toast.show('セットの保存が完了しました', 'Done!', $this.$store.state.notificationSystem.options.ballon);
+            console.log("%cinfo: %csaving set data is finished", 'color:blue','');
+          })
           .catch(function() {
             alert("DBの保存に失敗しました。");
           });

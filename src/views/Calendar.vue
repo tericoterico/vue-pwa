@@ -1,230 +1,150 @@
 <template>
-  <v-app id="app">
-    <v-container fluid>
-      <v-layout row wrap fill-height>
-        <v-flex xs12>
+  <v-container fluid>
+    <v-layout wrap>
+      <v-flex xs12>
+        <v-sheet height="500">
           <v-calendar
             ref="calendar"
             v-model="start"
             :type="type"
             :end="end"
             color="primary"
-          ></v-calendar>          
+          ></v-calendar>
+        </v-sheet>
+      </v-flex>
+    </v-layout>
+      <v-layout row nowrap>
+      <v-flex
+        xs6
+        class="text-sm-left text-xs-center"
+      >
+        <v-btn @click="$refs.calendar.prev()">
+          <v-icon
+            dark
+            left
+          >
+            keyboard_arrow_left
+          </v-icon>
+          Prev
+        </v-btn>
+      </v-flex>
+      <v-flex
+        xs6
+        class="text-sm-right text-xs-center"
+      >
+        <v-btn @click="$refs.calendar.next()">
+          Next
+          <v-icon
+            right
+            dark
+          >
+            keyboard_arrow_right
+          </v-icon>
+        </v-btn>
+      </v-flex>
+      </v-layout>
+      <v-layout row nowrap>
+        <v-flex xs12>
+          <div class="p-score">
+            <div class="p-score_bar" v-bind:style="{width: total_score%100 + '%'}"></div>
+            <div class="p-score_label" v-for="index in 11" :key="index" :data-index="index-1">
+              {{(index-1)*10}}
+            </div>
+          </div>
         </v-flex>
       </v-layout>
-    </v-container>
-  </v-app>
+
+  </v-container>
 </template>
 
 <script>
 //Vue Component
-// import TaskCard from './TaskCard';
-import Draggable from "vuedraggable";
 
 export default {
   name: "home",
   created: function() {
+    console.log("created");
   },
   mounted: async function() {
     const $this = this;
-    //保存したセットリストをDBから読み込み
-    $db.todos.toArray()
-      .then(function (datas) {
-        $this.saved_list = datas;
-      });
+
+    //成績DBから取得
+    await $db.scores
+    .where('date')
+    .between(1560860735, 1570860948)
+    .each(function(item){
+      console.log($this.$moment.unix(item.date).format('YYYY/MM/DD HH:mm:ss'));
+    })
+
+
+    //合計点数をDBから取得
+    $this.total_score = 0;
+    
+    await $db.scores
+    .where('score')
+    .above(0)
+    .each(function(item){
+      $this.total_score += item.score
+    })
   },
   computed: {
-    limit_display: function() {
-      return (
-        Math.floor(this.limit / 60) + "ふん" + (this.limit % 60) + "びょう"
-      );
-    },
-    elapsed_display: function() {
-      return (
-        Math.floor(this.elapsed / 60) + "ふん" + (this.elapsed % 60) + "びょう"
-      );
-    },
-    sec_conv_min: function() {
-      return this.limit / 60;
-    }
   },
   components: {
-    // "v-taskcard": TaskCard,
-    "v-draggable": Draggable
   },
   methods: {
-    /**
-     * 一覧からtodoを追加
-     *
-     */
-    add_card: function(id) {
-      var _data = this._.find(this.items, { id: id });
-
-      _data.added = true;
-      // this.todos.push(_data);
-    },
-    onChangeCombo:function(e){
-      const $this = this;
-      // _.each($this.items, function(v,k){
-      //   v.added = false;
-      // })
-
-      this.items = e.data;
-
-      //ラベル名にデータを反映
-      $this.preset_name = e.name;
-      //Todoリストにデータを反映
-      // $this.todos = e.data;
-
-      //リストに追加済カードは選択可能一覧から削除する
-      // var _id = _.map(e.data,function(e){
-      //   return e.id
-      // })
-      // _.each(_id,function(i){
-      //   _.find($this.items, {'id':i}).added = true;
-      // })
-    },
-    delete_from_list:function(id){
-       var _data = this._.find(this.items, { id: id });
-       _data.added = false;
-    },
-    /**
-     * 選択したtodoを読み込み
-     *
-     */
-    load_todo: function() {
-      console.log("loading..");
-    },
-    /**
-     * 選択したtodoを削除
-     *
-     */
-    delete_todo: function() {
-      console.log("delte..");
-    },
-    /**
-     * todoを保存
-     *
-     */
-    save_todo: function() {
-      let errList = [];
-      try {
-        //validation
-        if (!this.preset_name) errList.push("セット名が空です");
-        // if (this.todos.length < 1) errList.push("Todoリストが空です");
-
-        if(errList.length) throw new Error(errList);
-
-        //DBへ保存
-        $db.todos
-          .add({
-            name: this.preset_name,
-            data: this.items
-          })
-          .then(function() {})
-          .catch(function() {
-            alert("DBの保存に失敗しました。");
-          });
-      } catch (error) {
-        alert(error.message);
-      }
-    }
   },
   data: function() {
     return {
-      preset_name: "",
-      select: "",
-      saved_list: [],
-      items: [
-        {
-          id: 1,
-          name: "あさ ごはん",
-          img: "./img/food_toast.png",
-          added: false,
-          finished:false
-        },
-        {
-          id: 2,
-          name: "はみがき",
-          img: "./img/ha_hamigaki_boy.png",
-          added: false,
-          finished:false
-        },
-        {
-          id: 3,
-          name: "おきがえ",
-          img: "./img/kigae_boy.png",
-          added: false,
-          finished:false
-        },
-        {
-          id: 4,
-          name: "おかたづけ",
-          img: "./img/omocha_kataduke.png",
-          added: false,
-          finished:false
-        },
-        {
-          id: 5,
-          name: "かお あらう",
-          img: "./img/sengan_boy.png",
-          added: false,
-          finished:false
-        },
-        {
-          id: 6,
-          name: "てあらい うがい",
-          img: "./img/ugai_tearai.png",
-          added: false,
-          finished:false
-        },
-        {
-          id: 7,
-          name: "もちもの エプロン",
-          img: "./img/apron.png",
-          added: false,
-          finished:false
-        },
-        {
-          id: 8,
-          name: "もちもの ハンカチ",
-          img: "./img/fashion_handkerchief_blue.png",
-          added: false,
-          finished:false
-        },
-        {
-          id: 9,
-          name: "もちもの はぶらし",
-          img: "./img/haburashi.png",
-          added: false,
-          finished:false
-        },
-        {
-          id: 10,
-          name: "もちもの すいとう",
-          img: "./img/obentou_suitou.png",
-          added: false,
-          finished:false
-        },
-        {
-          id: 11,
-          name: "もちもの うわぐつ",
-          img: "./img/uwabaki_blue.png",
-          added: false,
-          finished:false
-        }
-      ],
-      todos: []
+      total_score:0,
+      type: 'month',
+      start: '2019-01-01',
+      end: '2019-11-06',
+      typeOptions: [
+        { text: 'Day', value: 'day' },
+        { text: '4 Day', value: '4day' },
+        { text: 'Week', value: 'week' },
+        { text: 'Month', value: 'month' },
+        { text: 'Custom Daily', value: 'custom-daily' },
+        { text: 'Custom Weekly', value: 'custom-weekly' }
+      ]
     };
   }
 };
 </script>
 
 <style lang="scss" scoped>
-.p-pop {
-  background: #eee;
-  border-radius: 8px;
-  padding: 8px;
-  min-height: 20vh;
+
+.p-score{
+  width: 100%;
+  min-height: 40px;
+  background-image: linear-gradient(90deg, #ccc 3.33%, #ffffff 3.33%, #ffffff 50%, #ccc 50%, #ccc 53.33%, #ffffff 53.33%, #ffffff 100%);
+  background-size: 2% 40.00px;
+  background-repeat: repeat-x;
+  position: relative;
+  border: 1px solid #ccc;
+  &_bar{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 40px;
+    background: rgba(76, 175, 80, 0.7);
+    transition:all ease 1.5s;
+  }
+  &_label{
+    position: absolute;
+    @for $i from 0 through 10 {
+      &[data-index="#{$i}"]{
+        position: absolute;
+        bottom: -25px;
+        left: percentage($i/10);
+        margin-left: -20px;
+        text-align: center;
+        font-weight: bold;
+        width: 3em;
+      }
+    }
+  }
 }
+
 </style>
