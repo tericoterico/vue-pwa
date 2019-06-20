@@ -19,7 +19,7 @@
     ></v-slider>
     <div class="p-time_display">{{limit_display}}</div>
     <v-flex xs12>
-      <v-btn @click="start_timer">START</v-btn>
+      <v-btn @click="click_start">START</v-btn>
       <v-btn @click="stop_timer">STOP</v-btn>
       <v-btn @click="finish_timer">Finish</v-btn>
       <v-btn @click="show_sum_score">SUM</v-btn>
@@ -29,11 +29,14 @@
 
 <script>
 //Vue Component
+import EventBus from '../eventbus.js';
 
 export default {
   name: "home",
   created: function() {
     console.log("%cINFO%c: SideHome created","color:blue","");
+
+    EventBus.$on('toggle_side', this.toggle_side);
   },
   mounted: async function() {
     const $this = this;
@@ -92,7 +95,8 @@ export default {
     onChangeLimit:function(data){
 
       this.$store.commit('update_limit_time', data);
-      this.$parent.countdown.updateTime(data)
+      EventBus.$emit('update_countdown_timer', data)
+      // this.$parent.$parent.countdown.updateTime(data)
     },
 
     /**
@@ -100,22 +104,8 @@ export default {
      *
      */
 
-    start_timer: function() {
-      const $this = this;
-      if (timer) clearInterval(timer);
-
-      $this.start_time = $this.$moment();
-      timer = setInterval(function() {
-        $this.elapsed = $this.$moment().diff($this.start_time, "seconds");
-      }, 1000);
-
-      $this.pause = false;
-
-      //サイドメニュー閉じる
-      // this.is_side = !this.is_side;
-
-      //Toast通知
-      this.$toast.show('START!', 'Good Luck!', this.$store.state.notificationSystem.options.show);
+    click_start: function() {
+      EventBus.$emit('start_timer');
     },
 
     /**

@@ -54,11 +54,13 @@
 //Vue Component
 
 import SideHome from '../components/SideHome';
+import EventBus from '../eventbus.js';
 
 export default {
   name: "home",
   created: function() {
     console.log("%cINFO%c: SideMenu created","color:blue","");
+    EventBus.$on('toggle_side', this.toggle_side);
   },
   mounted: async function() {
     const $this = this;

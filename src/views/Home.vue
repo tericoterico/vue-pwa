@@ -51,7 +51,7 @@
             class="count-down-circle"
           ></circular-count-down-timer>
         </v-flex>
-
+<!--
         <div class="p-date" v-if="false">
           <span class="display-3">{{date.h}}</span>じ
           <span class="display-3">{{date.m}}</span>ふん
@@ -60,7 +60,7 @@
           <span class="display-1">{{date.M}}</span>がつ
           <span class="display-1">{{date.D}}</span>にち
         </div>
-
+-->
       </v-layout>
       <v-layout class="p-target" row wrap>
         <v-draggable class="drag-container" :options="{disabled: true}">
@@ -110,14 +110,15 @@ import Draggable from "vuedraggable";
 import anime from "animejs";
 import Clock from 'vue-clock2';
 import SideMenu from '../components/SideMenu'
-import { setInterval, clearInterval, setTimeout } from "timers";
+import { setTimeout } from "timers";
+import EventBus from '../eventbus.js';
 
 var timer = "";
 
 export default {
   name: "home",
-  created: function() {
-    var _this = this;
+  created() {
+    // var _this = this;
     // setInterval(function() {
     //   _this.date.Y = _this.$moment().format("YYYY");
     //   _this.date.M = _this.$moment().format("MM");
@@ -126,9 +127,11 @@ export default {
     //   _this.date.m = _this.$moment().format("mm");
     //   _this.date.s = _this.$moment().format("ss");
     // }, 1000);
+    EventBus.$on('update_countdown_timer', this.update_countdown_timer);
+    EventBus.$on('start_timer', this.start_timer);
   },
   mounted: function() {
-    const $this = this;
+    // const $this = this;
   },
   computed: {
     limit_display: function() {
@@ -151,6 +154,36 @@ export default {
     Clock,
   },
   methods: {
+
+    /**
+     * タイマーを開始
+     *
+     */
+
+    start_timer: function() {
+
+      const $this = this;
+      if (timer) clearInterval(timer);
+
+      $this.start_time = $this.$moment();
+      timer = setInterval(function() {
+        $this.elapsed = $this.$moment().diff($this.start_time, "seconds");
+      }, 1000);
+
+      $this.pause = false;
+
+      //サイドメニュー閉じる
+      EventBus.$emit('toggle_side');
+      // this.is_side = !this.is_side;
+
+      //Toast通知
+      this.$toast.show('START!', 'Good Luck!', this.$store.state.notificationSystem.options.show);
+    },
+
+
+    update_countdown_timer(time) {
+      this.$refs.countdown.updateTime(time);
+    },
 
     /**
      * タイルの完了チェックが変更された
@@ -199,7 +232,6 @@ export default {
             { value: "1turn", duration: 1000 }
           ]
         });
-
 
         anime({
           targets: '[id="' + id + '"] .p-btn_finished .p-btn_pulse',
@@ -277,7 +309,7 @@ export default {
           date: Number($this.$moment().format('X')), //timestamp
           score: _.filter($this.$store.state.current_items, {added:true, finished:true}).length
         })
-        .then(function(e) {
+        .then(function() {
 
           //保存完了したらcheckedを全て外す
           $this.$store.commit('uncheck_all_current_items_finished');
