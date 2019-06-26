@@ -54,11 +54,13 @@
         </v-flex>
       </v-layout>
 
+      <v-sidemenu></v-sidemenu>
   </v-container>
 </template>
 
 <script>
 //Vue Component
+import SideMenu from '../components/SideMenu'
 
 export default {
   name: "home",
@@ -90,6 +92,7 @@ export default {
   computed: {
   },
   components: {
+    "v-sidemenu": SideMenu
   },
   methods: {
   },

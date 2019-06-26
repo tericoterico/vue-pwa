@@ -1,5 +1,5 @@
 <template>
-  <v-app id="app">
+  <v-app id="app" class="l-tiles">
     <v-container fluid>
       <v-layout row wrap>
         <v-flex xs8>
@@ -51,14 +51,15 @@
         </v-flex>
       </v-layout>
 
+      <v-sidemenu></v-sidemenu>
     </v-container>
   </v-app>
 </template>
 
 <script>
 //Vue Component
-// import TaskCard from './TaskCard';
 import Draggable from "vuedraggable";
+import SideMenu from '../components/SideMenu'
 
 export default {
   name: "home",
@@ -88,8 +89,8 @@ export default {
     }
   },
   components: {
-    // "v-taskcard": TaskCard,
-    "v-draggable": Draggable
+    "v-draggable": Draggable,
+    "v-sidemenu": SideMenu
   },
   methods: {
 

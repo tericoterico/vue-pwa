@@ -105,7 +105,6 @@
 
 <script>
 //Vue Component
-// import TaskCard from './TaskCard';
 import Draggable from "vuedraggable";
 import anime from "animejs";
 import Clock from 'vue-clock2';
@@ -373,6 +372,10 @@ export default {
       opacity: 0.35;
     }
   }
+  .l-tiles &_img img{
+    height: 14vh;
+  }
+
   &_img {
     transition: opacity ease 0.5s;
     img {
@@ -385,6 +388,10 @@ export default {
     font-weight: bold;
     transition: opacity ease 0.5s;
     color: #4caf50;
+  }
+
+  .l-tiles &_caption {
+    font-size: 18px;
   }
 
   &_index {
@@ -473,7 +480,7 @@ export default {
     padding: 20px 10px;
     -webkit-overflow-scrolling: touch;
     > div{
-      min-width: 27.5%;
+      min-width: 22.5%;
     }
   }
 }
@@ -574,5 +581,34 @@ export default {
     font-weight: bold;
   }
 }
+
+#app{
+  color:#987661 !important;
+  .v-input--slider *{
+    color:#987661 !important;
+  }
+  .clock{
+    border: 4px solid #b7a193; 
+    .clock-hour{
+      background:#ff5722;
+      top: 30%;
+      width: 6px;
+      height: 20%;
+      margin-left: -3px;
+    }
+    .clock-minute{
+      background:green;
+    }
+    .hour{
+      >span{
+        >i{
+          font-weight: bold;
+          color:#987661;
+        }
+      }
+    }
+  }
+}
+ 
 
 </style>

@@ -1,29 +1,32 @@
 <template>
   <div>
-    <v-select
-      :items="setlist"
-      item-text="name"
-      item-value="id"
-      label="保存したセットから読み込む"
-      @change="onChangeSelect"
-    ></v-select>
-    <v-slider
-      label="制限時間を設定"
-      thumb-size="40"
-      max="1800"
-      step="30"
-      prepend-icon="timer"
-      v-model="limit"
-      v-bind:value="limit"
-      @change="onChangeLimit"
-    ></v-slider>
-    <div class="p-time_display">{{limit_display}}</div>
-    <v-flex xs12>
-      <v-btn @click="click_start">START</v-btn>
-      <v-btn @click="stop_timer">STOP</v-btn>
-      <v-btn @click="finish_timer">Finish</v-btn>
-      <v-btn @click="show_sum_score">SUM</v-btn>
-    </v-flex>
+    <!-- Home -->
+    <div v-if="$route.name==='home'">
+      <v-select
+        :items="setlist"
+        item-text="name"
+        item-value="id"
+        label="保存したセットから読み込む"
+        @change="onChangeSelect"
+      ></v-select>
+      <v-slider
+        label="制限時間を設定"
+        thumb-size="40"
+        max="1800"
+        step="30"
+        prepend-icon="timer"
+        v-model="limit"
+        v-bind:value="limit"
+        @change="onChangeLimit"
+      ></v-slider>
+      <div class="p-time_display">{{limit_display}}</div>
+      <v-flex xs12>
+        <v-btn @click="click_start">START</v-btn>
+        <v-btn @click="stop_timer">STOP</v-btn>
+        <v-btn @click="finish_timer">Finish</v-btn>
+        <v-btn @click="show_sum_score">SUM</v-btn>
+      </v-flex>
+    </div>
   </div>
 </template>
 
